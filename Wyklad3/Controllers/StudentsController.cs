@@ -3,6 +3,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Wyklad3.Models;
 using Wyklad3.Services;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace Wyklad3.Controllers
 {
@@ -11,6 +13,8 @@ namespace Wyklad3.Controllers
     public class StudentsController : ControllerBase
     {
         private IDbService _dbService;
+        private string conString="Data Source=db-mssql;Initial Catalog=s16859;Integrated Security=True";
+
 
         public StudentsController(IDbService service)
         {
@@ -21,25 +25,42 @@ namespace Wyklad3.Controllers
         [HttpGet]
         public IActionResult GetStudents([FromServices]IDbService service, [FromQuery]string orderBy)
         {
-            if (orderBy == "lastname")
+            var list = new List<StudentInfoDTO>();
+            using (SqlConnection con = new SqlConnection(conString))
+            using (SqlCommand com = new SqlCommand())
             {
-                return Ok(_dbService.GetStudents().OrderBy(s => s.LastName));
-            }
+                com.Connection = con;
+                com.CommandText = "select s.FirstName, s.LastName, s.BirthDate, st.Name, e.Semester from Student s join Enrollment e on e.IdEnrollment = s.IdEnrollment join Studies st on st.IdStudy = e.IdStudy";
 
-            return Ok(_dbService.GetStudents());
+                con.Open();
+
+                SqlDataReader dr = com.ExecuteReader();
+                while (dr.Read())
+                {
+                    var st = new StudentInfoDTO
+                    {
+                        FirstName = dr["FirstName"].ToString(),
+                        LastName = dr["LastName"].ToString(),
+                        BirthDate = dr["BirthDate"].ToString(),
+                        Name = dr["Name"].ToString(),
+                        Semester = dr["Semester"].ToString()
+                    };
+                    list.Add(st);
+
+
+                }
+                return Ok(list);
+            }
         }
+
 
         //[FromRoute], [FromBody], [FromQuery]
         //1. URL segment
         [HttpGet("{id}")]
         public IActionResult GetStudent([FromRoute]int id) //action method
         {
-            if (id == 1)
-            {
-                return Ok("Jan");
-            }
-
-            return NotFound("Student was not found");
+            
+            return null;
         }
 
         //3. Body - cialo zadan

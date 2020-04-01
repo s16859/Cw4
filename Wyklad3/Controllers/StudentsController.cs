@@ -53,7 +53,7 @@ namespace Wyklad3.Controllers
             }
         }
 
-        /*
+        
         //[FromRoute], [FromBody], [FromQuery]
         //1. URL segment
         [HttpGet("{id}")]
@@ -64,7 +64,8 @@ namespace Wyklad3.Controllers
             using (SqlCommand com = new SqlCommand())
             {
                 com.Connection = con;
-                com.CommandText = "select s.FirstName, s.LastName, s.BirthDate, st.Name, e.Semester from Student s join Enrollment e on e.IdEnrollment = s.IdEnrollment join Studies st on st.IdStudy = e.IdStudy where s.IndexNumber=@id";
+                com.CommandText = "select s.FirstName, s.LastName, s.BirthDate, st.Name, e.Semester from Student s join Enrollment e on e.IdEnrollment = s.IdEnrollment" +
+                    " join Studies st on st.IdStudy = e.IdStudy where s.IndexNumber=@id";
                 com.Parameters.AddWithValue("id", id);
 
                 con.Open();
@@ -87,26 +88,8 @@ namespace Wyklad3.Controllers
                 return Ok(list);
             }
 
-        }*/
-
-        [HttpGet("{id}")]
-        public IActionResult GetStudentsDelete([FromRoute]string id)
-        {
-            var list = new List<StudentInfoDTO>();
-            using (SqlConnection con = new SqlConnection(conString))
-            using (SqlCommand com = new SqlCommand())
-            {
-                com.Connection = con;
-                com.CommandText = "Select * From Student where FirstName=@id";
-                //com.Parameters.AddWithValue("id", id);
-
-                con.Open();
-
-                SqlDataReader dr = com.ExecuteReader();
-                
-                return Ok(list);
-            }
         }
+
 
         //3. Body - cialo zadan
         [HttpPost]
